@@ -1,0 +1,14 @@
+{
+    "name": "elm-loader",
+    "set": "local",
+    "source": "",
+    "depends": [
+        "argonaut",
+        "console",
+        "effect",
+        "node-child-process",
+        "prelude",
+        "random",
+        "webpack-loader-api"
+    ]
+}
