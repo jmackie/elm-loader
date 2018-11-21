@@ -1,0 +1,9 @@
+/node_modules/
+/.pulp-cache/
+/output/
+/generated-docs/
+/.psc-package/
+/psc-package.json
+/src/
+/build.sh
+/example/

@@ -4,5 +4,5 @@ node_modules/
 /generated-docs/
 /.psc-package/
 
-example/dist/
-example/elm-stuff
+/example/dist/
+/example/elm-stuff/
