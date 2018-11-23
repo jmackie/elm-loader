@@ -17,7 +17,7 @@ import Node.ChildProcess as ChildProcess
 import Node.Encoding as Encoding
 import Node.Stream as Stream
 
-import Node.ChildProcess (Exit(..), defaultSpawnOptions) as Reexports
+import Node.ChildProcess (Exit(..), SpawnOptions, defaultSpawnOptions) as Reexports
 
 
 type Result =

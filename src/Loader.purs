@@ -42,7 +42,7 @@ loaderApp options appInfo ctx = do
         liftEffect (addContextDependencies ctx (appInfo.sourceDirs <> dirs))
         liftEffect (addDependencies ctx files)
 
-    result <- compile options.compiler (Webpack.resourcePath ctx)
+    result <- compile options (Webpack.resourcePath ctx)
     case result of
          Left err -> do
             liftEffect (Console.log err)
@@ -62,8 +62,14 @@ gatherElmDependencies sourceDirs =
     foldl FS.appendWalkResult FS.emptyWalkResult <$> traverse FS.walk sourceDirs
 
 
-compile :: String -> FilePath -> Aff (Either String Buffer)
-compile elm entrypoint = Elm.makeWith elm Elm.defaultFlags Elm.JS entrypoint
+compile :: Options -> FilePath -> Aff (Either String Buffer)
+compile options entrypoint =
+    Elm.makeWith
+        options.compiler
+        options.cwd
+        Elm.defaultFlags
+        Elm.JS
+        entrypoint
 
 
 addContextDependencies :: Webpack.LoaderContext -> Array FilePath -> Effect Unit

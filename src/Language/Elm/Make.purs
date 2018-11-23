@@ -46,14 +46,25 @@ targetToExtension = case _ of
     JS   -> "js"
 
 
-make :: Flags -> Target -> FilePath -> Aff (Either String Buffer)
+make
+    :: Maybe FilePath
+    -> Flags
+    -> Target
+    -> FilePath
+    -> Aff (Either String Buffer)
 make = makeWith "elm"
 
 
-makeWith :: String -> Flags -> Target -> FilePath -> Aff (Either String Buffer)
-makeWith elm flags target entrypoint =
+makeWith
+    :: String
+    -> Maybe FilePath
+    -> Flags
+    -> Target
+    -> FilePath
+    -> Aff (Either String Buffer)
+makeWith elm cwd flags target entrypoint =
     withResource randomOutputFilePath tryUnlink
-        (makeWith' elm flags target entrypoint)
+        (makeWith' elm cwd flags target entrypoint)
   where
     randomOutputFilePath :: Aff FilePath
     randomOutputFilePath = addExtension (targetToExtension target) <$> randomHash
@@ -66,25 +77,25 @@ makeWith elm flags target entrypoint =
 
 makeWith'
     :: String
+    -> Maybe FilePath
     -> Flags
     -> Target
     -> FilePath
     -> FilePath
     -> Aff (Either String Buffer)
-makeWith' elm flags target entrypoint outputFile = do
-    result <- ChildProcess.spawn elm args ChildProcess.defaultSpawnOptions
+makeWith' elm cwd flags target entrypoint outputFile = do
+    result <- ChildProcess.spawn elm args spawnOptions
     case result of
          { exit: ChildProcess.Normally 0 } -> Right <$> FS.readFile outputFile
          { stderr } -> pure (Left stderr)
   where
     args :: Array String
     args =
-        [ "make" ] <>
-        flagsToArgs flags <>
-        [ "--output"
-        , outputFile
-        , entrypoint
-        ]
+        [ "make" ] <> flagsToArgs flags <> [ "--output", outputFile, entrypoint ]
+
+    spawnOptions :: ChildProcess.SpawnOptions
+    spawnOptions =
+        ChildProcess.defaultSpawnOptions { cwd = cwd }
 
 
 flagsToArgs :: Flags -> Array String

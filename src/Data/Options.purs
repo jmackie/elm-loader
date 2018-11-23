@@ -7,22 +7,25 @@ where
 
 import Prelude
 
+import Control.Alt ((<|>))
 import Control.Monad.Except (runExcept)
 import Data.Bifunctor (lmap)
 import Data.Either (Either)
-import Data.Maybe (maybe)
+import Data.Maybe (Maybe(Just, Nothing), maybe)
 import Data.Semigroup.Foldable (intercalateMap)
 import Foreign (F, Foreign)
 import Foreign as Foreign
 import Foreign.Object (Object)
 import Foreign.Object as Object
+import Node.Path (FilePath)
 
 
 -- | Options passed in to the loader.
 type Options =
-    { compiler :: String  -- elm binary name
-    , watch    :: Boolean -- watch mode?
-    , verbose  :: Boolean -- print status messages?
+    { compiler :: String          -- elm binary name
+    , watch    :: Boolean         -- watch mode?
+    , verbose  :: Boolean         -- print status messages?
+    , cwd      :: Maybe FilePath  -- directory to run from
     }
 
 
@@ -31,6 +34,7 @@ default =
     { compiler: "elm"
     , watch: false
     , verbose: false
+    , cwd: Nothing
     }
 
 
@@ -43,14 +47,26 @@ fromObject =
 
 
 read :: Object Foreign -> F Options
-read obj = do
-    compiler <- maybe (pure default.compiler) Foreign.readString
-        (Object.lookup "compiler" obj)
+read object = do
+    compiler <- option default.compiler
+        Foreign.readString
+        (Object.lookup "compiler" object)
 
-    watch <- maybe (pure default.watch) Foreign.readBoolean
-        (Object.lookup "watch" obj)
+    watch <- option default.watch
+        Foreign.readBoolean
+        (Object.lookup "watch" object)
 
-    verbose <- maybe (pure default.verbose) Foreign.readBoolean
-        (Object.lookup "verbose" obj)
+    verbose <- option default.verbose
+        Foreign.readBoolean
+        (Object.lookup "verbose" object)
 
-    pure { compiler, watch, verbose }
+    cwd <- option default.cwd
+        (\value -> Just    <$> Foreign.readString value
+               <|> Nothing <$  Foreign.readNullOrUndefined value
+        )
+        (Object.lookup "cwd" object)
+
+    pure { compiler, watch, verbose, cwd }
+  where
+    option :: forall a. a -> (Foreign -> F a) -> (Maybe Foreign) -> F a
+    option def = maybe (pure def)
