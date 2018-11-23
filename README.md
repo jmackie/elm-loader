@@ -52,7 +52,9 @@ module.exports = {
 
 ### `watch`: boolean
 
-### `verbose`: boolean
+### `onCompileBegin`: function()
+
+### `onCompileFinish`: function()
 
 ### `cwd`: string
 

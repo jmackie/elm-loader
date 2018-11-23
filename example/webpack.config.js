@@ -15,7 +15,14 @@ module.exports = {
                 use: [
                     {
                         loader: path.resolve(__dirname, '../index.js'),
-                        options: { debug: true, watch: true, verbose: true },
+                        options: {
+                            debug: true,
+                            watch: false,
+                            onCompileBegin: () =>
+                                console.log('Compiling elm...'),
+                            onCompileFinish: () =>
+                                console.log('Compilation finished'),
+                        },
                     },
                 ],
                 exclude: /(node_modules)/,

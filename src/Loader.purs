@@ -42,10 +42,13 @@ loaderApp options appInfo ctx = do
         liftEffect (addContextDependencies ctx (appInfo.sourceDirs <> dirs))
         liftEffect (addDependencies ctx files)
 
+    liftEffect options.onCompileBegin
     result <- compile options (Webpack.resourcePath ctx)
+    liftEffect options.onCompileFinish
+
     case result of
          Left err -> do
-            liftEffect (Console.log err)
+            liftEffect (Console.log err)  -- TODO: would emitError be nicer here?
             throwError (Exception.error "elm compilation failed")
 
          Right output ->
