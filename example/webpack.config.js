@@ -16,7 +16,8 @@ module.exports = {
                     {
                         loader: path.resolve(__dirname, '../index.js'),
                         options: {
-                            debug: true,
+                            debug: false,
+                            optimize: true,
                             watch: false,
                             onCompileBegin: () =>
                                 console.log('Compiling elm...'),

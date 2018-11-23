@@ -14,7 +14,7 @@ import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
 import Effect.Exception as Exception
-import Language.Elm.Make (makeWith, defaultFlags, Target(JS)) as Elm
+import Language.Elm.Make (makeWith, Flags, defaultFlags, Target(JS)) as Elm
 import Language.Elm.Project (Project(App, Pkg), AppInfo, PkgInfo) as Elm
 import Node.Buffer (Buffer)
 import Node.Encoding as Encoding
@@ -70,9 +70,13 @@ compile options entrypoint =
     Elm.makeWith
         options.compiler
         options.cwd
-        Elm.defaultFlags
+        flags
         Elm.JS
         entrypoint
+  where
+    flags :: Elm.Flags
+    flags = Elm.defaultFlags
+        { debug = options.debug, optimize = options.optimize }
 
 
 addContextDependencies :: Webpack.LoaderContext -> Array FilePath -> Effect Unit
@@ -100,7 +104,7 @@ getOptions ctx =
     case Webpack.query ctx of
          Left _ ->
             -- Not handling query strings atm
-            Right Options.default
+            Right Options.defaults
 
          Right object ->
              Options.fromObject object
