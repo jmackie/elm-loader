@@ -4,10 +4,11 @@
     "source": "",
     "depends": [
         "argonaut",
+        "datetime",
         "effect",
         "node-child-process",
+        "now",
         "prelude",
-        "random",
         "webpack-loader-api"
     ]
 }

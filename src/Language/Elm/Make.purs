@@ -12,17 +12,20 @@ import Prelude
 
 import Control.Monad.Error.Class (withResource)
 import Data.Array as Array
+import Data.DateTime.Instant as Instant
 import Data.Either (Either(Left, Right))
-import Data.Int as Int
 import Data.Maybe (Maybe(Just, Nothing))
+import Data.Newtype (unwrap)
 import Effect.Aff (Aff)
 import Effect.Aff as Aff
 import Effect.Class (class MonadEffect, liftEffect)
-import Effect.Random (randomInt)
+import Effect.Now as Now
 import Node.Buffer (Buffer)
 import Node.ChildProcess.Aff as ChildProcess
 import Node.FS.Aff as FS
+import Node.OS as OS
 import Node.Path (FilePath)
+import Node.Path as Path
 
 
 type Flags =
@@ -67,7 +70,11 @@ makeWith elm cwd flags target entrypoint =
         (makeWith' elm cwd flags target entrypoint)
   where
     randomOutputFilePath :: Aff FilePath
-    randomOutputFilePath = addExtension (targetToExtension target) <$> randomHash
+    randomOutputFilePath = do
+        dir  <- liftEffect OS.tmpdir
+        nowString <- show <$> now
+        let base = "elm-loader-" <> nowString <> "." <> targetToExtension target
+        pure (Path.concat [ dir, base ])
 
     -- NOTE: if `elm` fails then the file won't be created. And if we
     -- try to unlink a non-existent file it will raise an exception.
@@ -106,13 +113,5 @@ flagsToArgs flags =
         ]
 
 
-type Hash = String
-
-
-randomHash :: forall m. MonadEffect m => m Hash
-randomHash = liftEffect
-    (Int.toStringAs Int.hexadecimal <$> randomInt 1000 10000)
-
-
-addExtension :: String -> FilePath -> FilePath
-addExtension ext filePath = filePath <> "." <> ext
+now :: forall m. MonadEffect m => m Number
+now = liftEffect (unwrap <<<  Instant.unInstant <$> Now.now)
