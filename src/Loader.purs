@@ -6,6 +6,7 @@ import Control.Monad.Error.Class (class MonadThrow, throwError)
 import Data.Argonaut (jsonParser, decodeJson)
 import Data.Either (Either(Left, Right), either)
 import Data.Foldable (foldl, traverse_)
+import Data.Maybe (maybe)
 import Data.Options (Options)
 import Data.Options as Options
 import Data.Traversable (traverse)
@@ -19,6 +20,7 @@ import Node.Buffer (Buffer)
 import Node.Encoding as Encoding
 import Node.FS.Aff as FS
 import Node.Path (FilePath)
+import Node.Process as Process
 import Webpack.Loader as Webpack
 
 
@@ -29,9 +31,18 @@ loader = Webpack.mkAsyncLoader loader'
 loader' :: Webpack.LoaderContext -> Buffer -> Aff Webpack.Result
 loader' ctx _buffer = do
     options <- getOptions ctx # either panic pure
+    maybe (pure unit) changeWorkingDir options.cwd
     readElmJson >>= case _ of
         Elm.App appInfo -> loaderApp options appInfo ctx
         Elm.Pkg pkgInfo -> loaderPkg options pkgInfo ctx
+
+
+changeWorkingDir :: FilePath -> Aff Unit
+changeWorkingDir cwd = do
+    result <- liftEffect (Exception.try $ Process.chdir cwd)
+    case result of
+         Left err -> panic ("couldn't set cwd to " <> cwd <> ": " <> Exception.message err)
+         Right _  -> pure unit
 
 
 loaderApp :: Options -> Elm.AppInfo -> Webpack.LoaderContext -> Aff Webpack.Result
@@ -68,7 +79,6 @@ compile :: Options -> FilePath -> Aff (Either String Buffer)
 compile options entrypoint =
     Elm.makeWith
         options.compiler
-        options.cwd
         flags
         Elm.JS
         entrypoint

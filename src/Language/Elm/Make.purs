@@ -50,8 +50,7 @@ targetToExtension = case _ of
 
 
 make
-    :: Maybe FilePath
-    -> Flags
+    :: Flags
     -> Target
     -> FilePath
     -> Aff (Either String Buffer)
@@ -60,14 +59,13 @@ make = makeWith "elm"
 
 makeWith
     :: String
-    -> Maybe FilePath
     -> Flags
     -> Target
     -> FilePath
     -> Aff (Either String Buffer)
-makeWith elm cwd flags target entrypoint =
+makeWith elm flags target entrypoint =
     withResource randomOutputFilePath tryUnlink
-        (makeWith' elm cwd flags target entrypoint)
+        (makeWith' elm flags target entrypoint)
   where
     randomOutputFilePath :: Aff FilePath
     randomOutputFilePath = do
@@ -84,13 +82,12 @@ makeWith elm cwd flags target entrypoint =
 
 makeWith'
     :: String
-    -> Maybe FilePath
     -> Flags
     -> Target
     -> FilePath
     -> FilePath
     -> Aff (Either String Buffer)
-makeWith' elm cwd flags target entrypoint outputFile = do
+makeWith' elm flags target entrypoint outputFile = do
     result <- ChildProcess.spawn elm args spawnOptions
     case result of
          { exit: ChildProcess.Normally 0 } -> Right <$> FS.readFile outputFile
@@ -102,7 +99,7 @@ makeWith' elm cwd flags target entrypoint outputFile = do
 
     spawnOptions :: ChildProcess.SpawnOptions
     spawnOptions =
-        ChildProcess.defaultSpawnOptions { cwd = cwd }
+        ChildProcess.defaultSpawnOptions
 
 
 flagsToArgs :: Flags -> Array String

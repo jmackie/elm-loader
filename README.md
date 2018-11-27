@@ -79,7 +79,7 @@ If set to `true` all elm file dependencies will be registered with Webpack.
 
 #### `cwd`: `string` (default: `undefined`)
 
-Optional working directory in which to execute `elm`, passed on to [`child_prcess.spawn`](https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options).
+Optional working directory in which to run.
 
 #### `onCompileBegin`: `function()`
 
