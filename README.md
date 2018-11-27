@@ -1,20 +1,33 @@
-# elm-loader
+# `elm-loader`
+
+![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/jmackie/elm-loader.svg)
 
 Yet another [Webpack][webpack-home] loader for the [Elm][elm-home] programming language.
 
 It's written with the following goals in mind:
 
--   Work flawlessly with **Webpack v4** and **Elm 0.19**, don't try and be backwards compatible.
+-   Work primarily with **Webpack v4** and **Elm 0.19**, don't try and be backwards compatible.
 -   Work robustly and provide useful errors - hence it's actually written in [Purescript][purescript-home]. This is more important to me than performance.
--   Zero assumptions. Anything uncertain is passed in via `options`. For example, is the loader running in "watch mode"? I dunno, you tell me.
+-   Zero assumptions. Anything uncertain is passed in via `options`.
 -   Zero `npm` dependencies.
 
 # Installation
 
-TODO
+Just about every combination of `elm`, `webpack`, and `loader` is taken on `npm`. So this will live on Github for the forseeable future.
 
--   from github
--   don't fancy the name war on npm
+`package.json`
+
+```
+{
+    "name": "your-thing"
+    ...
+    "dependencies": {
+        ...
+        "elm-loader": "jmackie/elm-loader#0.2.0"
+        ...
+    }
+}
+```
 
 # How to use it
 
@@ -33,9 +46,9 @@ module.exports = {
                     {
                         loader: 'elm-loader',
                         options: {
-                            debug: true,
-                            watch: true,
-                            verbose: true
+                            compiler: 'elm',  // use `elm` on PATH
+                            debug: true,      // --debug
+                            watch: true,      // running in watch mode
                         },
                     },
                 ],
@@ -48,19 +61,33 @@ module.exports = {
 
 # Options
 
-#### `compiler`: string
+#### `compiler`: `string` (default: `'elm'`)
 
-#### `debug`: boolean
+Path to the `elm` compiler binary. This becomes the `command` argument to [`child_prcess.spawn`](https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options).
 
-#### `optimize`: boolean
+#### `debug`: `boolean` (default: `false`)
 
-#### `watch`: boolean
+If set to `true` the `--debug` flag will be passed to `elm make`
 
-#### `onCompileBegin`: function()
+#### `optimize`: `boolean` (default: `false`)
 
-#### `onCompileFinish`: function()
+If set to `true` the `--optimize` flag will be passed to `elm make`
 
-#### `cwd`: string
+#### `watch`: `boolean` (default: `false`)
+
+If set to `true` all elm file dependencies will be registered with Webpack.
+
+#### `cwd`: `string` (default: `undefined`)
+
+Optional working directory in which to execute `elm`, passed on to [`child_prcess.spawn`](https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options).
+
+#### `onCompileBegin`: `function()`
+
+Optional function to be executed before compilation starts. You can use this for logging.
+
+#### `onCompileFinish`: `function()`
+
+Optional function to be executed after compilation finishes. You can use this for logging
 
 [elm-home]: https://elm-lang.org/
 [purescript-home]: http://www.purescript.org/
