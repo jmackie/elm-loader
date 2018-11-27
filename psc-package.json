@@ -4,7 +4,6 @@
     "source": "",
     "depends": [
         "argonaut",
-        "console",
         "effect",
         "node-child-process",
         "prelude",

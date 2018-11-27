@@ -12,7 +12,6 @@ import Data.Traversable (traverse)
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
-import Effect.Console as Console
 import Effect.Exception as Exception
 import Language.Elm.Make (makeWith, Flags, defaultFlags, Target(JS)) as Elm
 import Language.Elm.Project (Project(App, Pkg), AppInfo, PkgInfo) as Elm
@@ -48,8 +47,8 @@ loaderApp options appInfo ctx = do
 
     case result of
          Left err -> do
-            liftEffect (Console.log err)  -- TODO: would emitError be nicer here?
-            throwError (Exception.error "elm compilation failed")
+            throwError <<< Exception.error $
+                "elm compilation failed\n\n" <> err
 
          Right output ->
             pure { source: output }
