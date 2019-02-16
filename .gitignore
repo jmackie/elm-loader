@@ -3,6 +3,7 @@ node_modules/
 /output/
 /generated-docs/
 /.psc-package/
+/.psc-ide-port
 
 /example/dist/
 /example/elm-stuff/
